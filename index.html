@@ -510,9 +510,9 @@
                     <h4>🚀 How It Works</h4>
                     <ul>
                         <li><strong>AI Content:</strong> Groq generates caption & image prompt</li>
-                        <li><strong>Image:</strong> Pollinations creates stunning visuals</li>
+                        <li><strong>Image:</strong> AI creates stunning visuals (1080x1920)</li>
                         <li><strong>Audio:</strong> Random background music (if configured)</li>
-                        <li><strong>Preview:</strong> See image, caption, and audio</li>
+                        <li><strong>Preview:</strong> See image, caption, and hashtags</li>
                         <li><strong>Approve/Reject:</strong> Review before posting</li>
                         <li><strong>Download:</strong> Get files & post to Instagram/YouTube</li>
                     </ul>
@@ -537,6 +537,7 @@
                         <h4>📝 Caption</h4>
                         <p id="captionText"></p>
                         
+                        <h4 style="margin-top: 15px;">🏷️ Hashtags</h4>
                         <div class="hashtags" id="hashtagsContainer"></div>
                         
                         <span class="reel-id-badge" id="reelIdBadge"></span>
@@ -610,7 +611,7 @@
                 }
                 
                 const data = await response.json();
-                console.log('Response:', data);
+                console.log('API Response:', data);
                 
                 if (!data.success) {
                     throw new Error(data.message || 'Failed to generate content');
@@ -622,7 +623,7 @@
                 displayPreview(data);
                 updateProgress(100);
                 
-                showStatus('🎉 Reel created successfully! Review and approve/reject.', 'success');
+                showStatus('🎉 Reel created successfully! Check image, caption & hashtags below.', 'success');
                 
             } catch (error) {
                 console.error('Error:', error);
@@ -637,7 +638,7 @@
         async function loadReel() {
             const reelId = document.getElementById('reelIdInput').value.trim();
             
-            if (!reelId) {
+            if (!prompt) {
                 showStatus('⚠️ Please enter a Reel ID', 'error');
                 return;
             }
@@ -684,6 +685,86 @@
             } finally {
                 showLoading(false);
             }
+        }
+
+        // Display preview with ALL data (fixed version)
+        function displayPreview(data) {
+            console.log('Displaying preview with data:', data);
+            
+            // Show image
+            const imagePreview = document.getElementById('imagePreview');
+            const imageUrl = data.image_url || data.image_download || data.image_download_url;
+            
+            if (imageUrl) {
+                imagePreview.innerHTML = `<img src="${imageUrl}" alt="Generated Reel Image" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22533%22%3E%3Crect fill=%22%23667eea%22 width=%22300%22 height=%22533%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22white%22%3EImage Loading...%3C/text%3E%3C/svg%3E';">`;
+            }
+
+            // Show caption
+            const caption = data.caption || 'AI-generated caption will appear here';
+            document.getElementById('captionText').textContent = caption;
+            
+            // Show reel ID
+            const reelId = data.reel_id || data.id || 'N/A';
+            document.getElementById('reelIdBadge').textContent = `ID: ${reelId}`;
+            
+            // Show hashtags - FIXED VERSION
+            const hashtagsContainer = document.getElementById('hashtagsContainer');
+            hashtagsContainer.innerHTML = '';
+            
+            let hashtagsToDisplay = [];
+            
+            // Handle different hashtag formats from API
+            if (Array.isArray(data.hashtags)) {
+                // Format: ["motivation", "success", "mindset"]
+                hashtagsToDisplay = data.hashtags.map(tag => 
+                    tag.startsWith('#') ? tag : `#${tag}`
+                );
+            } else if (typeof data.hashtags === 'string') {
+                // Format: "#motivation #success" or "motivation success"
+                hashtagsToDisplay = data.hashtags
+                    .split(/\s+/)
+                    .filter(tag => tag.trim())
+                    .map(tag => tag.startsWith('#') ? tag : `#${tag}`);
+            } else if (data.hashtags_string) {
+                // Alternative field from API
+                hashtagsToDisplay = data.hashtags_string
+                    .split(/\s+/)
+                    .filter(tag => tag.trim())
+                    .map(tag => tag.startsWith('#') ? tag : `#${tag}`);
+            }
+            
+            // Display hashtags
+            if (hashtagsToDisplay.length > 0) {
+                hashtagsToDisplay.forEach(tag => {
+                    const span = document.createElement('span');
+                    span.className = 'hashtag';
+                    span.textContent = tag;
+                    hashtagsContainer.appendChild(span);
+                });
+            } else {
+                // Fallback if no hashtags found
+                const span = document.createElement('span');
+                span.className = 'hashtag';
+                span.textContent = '#viral';
+                span.style.opacity = '0.5';
+                hashtagsContainer.appendChild(span);
+            }
+
+            // Show audio if available
+            const audioUrl = data.audio_url || data.audio_download || data.audio_download_url;
+            if (data.has_audio && audioUrl && !audioUrl.includes('null') && audioUrl !== 'null') {
+                document.getElementById('audioSection').style.display = 'block';
+                const audioPlayer = document.getElementById('audioPlayer');
+                audioPlayer.src = audioUrl;
+            } else {
+                document.getElementById('audioSection').style.display = 'none';
+            }
+
+            // Show metadata section
+            document.getElementById('metadataSection').style.display = 'block';
+            
+            console.log('Preview displayed - Caption:', caption);
+            console.log('Hashtags displayed:', hashtagsToDisplay);
         }
 
         // Approve reel
@@ -794,53 +875,21 @@
             }
         }
 
-        // Display preview
-        function displayPreview(data) {
-            // Show image
-            const imagePreview = document.getElementById('imagePreview');
-            imagePreview.innerHTML = `<img src="${data.image_url}" alt="Generated Reel Image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22533%22%3E%3Crect fill=%22%23667eea%22 width=%22300%22 height=%22533%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2224%22 fill=%22white%22%3EImage Loading...%3C/text%3E%3C/svg%3E'">`;
-
-            // Show caption
-            document.getElementById('captionText').textContent = data.caption || 'No caption generated';
-            
-            // Show reel ID
-            document.getElementById('reelIdBadge').textContent = `ID: ${data.reel_id}`;
-            
-            // Show hashtags
-            const hashtagsContainer = document.getElementById('hashtagsContainer');
-            hashtagsContainer.innerHTML = '';
-            if (data.hashtags) {
-                const hashtags = data.hashtags.split(' ').filter(h => h.trim());
-                hashtags.forEach(tag => {
-                    const span = document.createElement('span');
-                    span.className = 'hashtag';
-                    span.textContent = tag;
-                    hashtagsContainer.appendChild(span);
-                });
-            }
-
-            // Show audio if available
-            if (data.has_audio && data.audio_url && !data.audio_url.includes('null')) {
-                document.getElementById('audioSection').style.display = 'block';
-                const audioPlayer = document.getElementById('audioPlayer');
-                audioPlayer.src = data.audio_url;
-            } else {
-                document.getElementById('audioSection').style.display = 'none';
-            }
-
-            // Show metadata section
-            document.getElementById('metadataSection').style.display = 'block';
-        }
-
         // Download image
         function downloadImage() {
-            if (!currentReelData || !currentReelData.image_url) {
+            if (!currentReelData) {
                 showStatus('⚠️ No image to download', 'error');
                 return;
             }
 
+            const imageUrl = currentReelData.image_url || currentReelData.image_download || currentReelData.image_download_url;
+            if (!imageUrl) {
+                showStatus('⚠️ Image URL not available', 'error');
+                return;
+            }
+
             const a = document.createElement('a');
-            a.href = currentReelData.image_url;
+            a.href = imageUrl;
             a.download = `reel_${currentReelData.reel_id || Date.now()}.jpg`;
             a.target = '_blank';
             document.body.appendChild(a);
@@ -850,18 +899,31 @@
             showStatus('✅ Image download started!', 'success');
         }
 
-        // Copy caption
+        // Copy caption with hashtags
         function copyCaption() {
             if (!currentReelData) {
                 showStatus('⚠️ No caption to copy', 'error');
                 return;
             }
 
-            const fullText = `${currentReelData.caption}\n\n${currentReelData.hashtags || ''}`;
+            const caption = currentReelData.caption || '';
+            let hashtags = '';
+            
+            if (Array.isArray(currentReelData.hashtags)) {
+                hashtags = currentReelData.hashtags.map(h => h.startsWith('#') ? h : '#' + h).join(' ');
+            } else if (typeof currentReelData.hashtags === 'string') {
+                hashtags = currentReelData.hashtags;
+            } else if (currentReelData.hashtags_string) {
+                hashtags = currentReelData.hashtags_string;
+            }
+            
+            const fullText = `${caption}\n\n${hashtags}`;
+            
             navigator.clipboard.writeText(fullText).then(() => {
-                showStatus('✅ Caption copied! Ready to paste on Instagram 🚀', 'success');
+                showStatus('✅ Caption + Hashtags copied! Ready to paste 🚀', 'success');
             }).catch(err => {
                 showStatus('❌ Failed to copy caption', 'error');
+                console.error('Copy error:', err);
             });
         }
 
@@ -893,11 +955,10 @@
             document.getElementById('loadingText').textContent = text;
         }
 
-        // Check URL for reel ID
+        // Check URL for reel ID on page load
         window.addEventListener('DOMContentLoaded', () => {
             console.log('🎬 AI Reel Studio loaded');
             
-            // Check if reel ID in URL
             const urlParams = new URLSearchParams(window.location.search);
             const reelId = urlParams.get('id');
             
