@@ -3,143 +3,604 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎬 AI Reel Generator - CORS Fixed</title>
+    <title>🎬 AI Reel Studio - Video Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Unbounded:wght@600;800&display=swap" rel="stylesheet">
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --dark: #1A1A2E;
+            --darker: #0F0F1E;
+            --light: #F7F7F7;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
         }
-        .container { max-width: 800px; margin: 0 auto; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--darker);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated gradient background */
+        .bg-animated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: -1;
+            opacity: 0.15;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header with modern typography */
         .header {
             text-align: center;
-            color: white;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-family: 'Unbounded', cursive;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        /* Main grid layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
             margin-bottom: 40px;
         }
-        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
-        .card {
-            background: white;
-            border-radius: 25px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+
+        @media (max-width: 968px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
         }
+
+        /* Card design with glassmorphism */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4);
+        }
+
+        .card h2 {
+            font-family: 'Unbounded', cursive;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+
+        /* Input styling */
         textarea {
             width: 100%;
-            padding: 15px;
-            border: 3px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 1em;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            font-size: 1rem;
             font-family: inherit;
+            color: var(--light);
             resize: vertical;
-            min-height: 120px;
+            min-height: 150px;
             margin-bottom: 20px;
+            transition: all 0.3s ease;
         }
+
         textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--secondary);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.1);
         }
+
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Button with gradient and animation */
         .btn {
-            padding: 15px 35px;
-            font-size: 1.1em;
+            padding: 18px 40px;
+            font-size: 1.1rem;
+            font-weight: 700;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            font-weight: 700;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             display: flex;
             align-items: center;
-            gap: 10px;
-            width: 100%;
             justify-content: center;
+            gap: 12px;
+            width: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .btn:hover { transform: translateY(-2px); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .status {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 12px;
-            display: none;
-            text-align: center;
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
         }
-        .status.active { display: block; }
-        .status.success { background: #d1fae5; color: #065f46; }
-        .status.error { background: #fee2e2; color: #991b1b; }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+        }
+
+        /* Video preview container */
+        .video-preview {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 9/16;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .video-preview video,
+        .video-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-preview-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .video-preview-placeholder svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        /* Loading spinner */
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: 30px;
         }
-        .loading.active { display: block; }
+
+        .loading.active {
+            display: block;
+        }
+
         .spinner {
-            border: 5px solid #f3f4f6;
-            border-top: 5px solid #667eea;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--secondary);
             border-radius: 50%;
             width: 50px;
             height: 50px;
             animation: spin 1s linear infinite;
-            margin: 0 auto;
+            margin: 0 auto 20px;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Progress bar */
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            width: 0%;
+            transition: width 0.3s ease;
+            background-size: 200% 100%;
+            animation: progressShimmer 2s linear infinite;
+        }
+
+        @keyframes progressShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Status messages */
+        .status {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 16px;
+            display: none;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status.success {
+            background: rgba(74, 222, 128, 0.15);
+            border: 2px solid rgba(74, 222, 128, 0.3);
+            color: #4ade80;
+        }
+
+        .status.error {
+            background: rgba(248, 113, 113, 0.15);
+            border: 2px solid rgba(248, 113, 113, 0.3);
+            color: #f87171;
+        }
+
+        .status.info {
+            background: rgba(96, 165, 250, 0.15);
+            border: 2px solid rgba(96, 165, 250, 0.3);
+            color: #60a5fa;
+        }
+
+        /* Caption and metadata display */
+        .metadata {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .metadata h4 {
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .metadata p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .hashtags {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .hashtag {
+            background: rgba(78, 205, 196, 0.15);
+            color: var(--secondary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Download actions */
+        .download-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .download-section .btn {
+            width: auto;
+        }
+
+        /* Gallery grid */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .gallery-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            border-color: var(--secondary);
+        }
+
+        .gallery-item img,
+        .gallery-item video {
+            width: 100%;
+            aspect-ratio: 9/16;
+            object-fit: cover;
+        }
+
+        .gallery-info {
+            padding: 15px;
+        }
+
+        .gallery-info h4 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: var(--light);
+        }
+
+        .gallery-info p {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Floating action button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        /* Info box */
         .info-box {
-            background: #fef3c7;
-            border: 2px solid #f59e0b;
-            border-radius: 12px;
+            background: rgba(255, 230, 109, 0.1);
+            border: 2px solid rgba(255, 230, 109, 0.3);
+            border-radius: 16px;
             padding: 20px;
             margin: 20px 0;
         }
-        .info-box h4 { color: #92400e; margin-bottom: 10px; }
+
+        .info-box h4 {
+            color: var(--accent);
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+        }
     </style>
 </head>
 <body>
+    <div class="bg-animated"></div>
+    
     <div class="container">
         <div class="header">
-            <h1>🎬 AI Reel Generator</h1>
-            <p>Forever Free • CORS Fixed</p>
+            <h1>🎬 AI Reel Studio</h1>
+            <p>Create stunning video reels with AI • Browser-based • Free Forever</p>
         </div>
 
-        <div class="card">
-            <h2 style="margin-bottom: 20px;">Create Your Reel</h2>
-            
-            <label style="display: block; margin-bottom: 10px; font-weight: 600;">
-                💡 What's your reel about?
-            </label>
-            <textarea 
-                id="promptInput" 
-                placeholder="Example: Create a motivational reel about never giving up..."
-            ></textarea>
+        <div class="main-grid">
+            <!-- Left Panel: Input -->
+            <div class="card">
+                <h2>✨ Create Your Reel</h2>
+                
+                <label style="display: block; margin-bottom: 12px; font-weight: 600; color: var(--secondary);">
+                    💡 Describe your reel idea
+                </label>
+                <textarea id="promptInput" placeholder="Example: A motivational morning routine reel with sunrise vibes, showing someone waking up early, exercising, and starting their day with energy..."></textarea>
 
-            <button class="btn" onclick="createReel()" id="createBtn">
-                <span>🎬</span>
-                <span>Generate Reel</span>
-            </button>
+                <button class="btn" onclick="generateReel()" id="createBtn">
+                    <span>🎬</span>
+                    <span>Generate Reel</span>
+                </button>
 
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p style="margin-top: 10px;">Creating your reel...</p>
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <p id="loadingText">Generating AI content...</p>
+                </div>
+
+                <div class="status" id="status"></div>
+
+                <div class="info-box" style="margin-top: 30px;">
+                    <h4>🚀 How It Works</h4>
+                    <ul>
+                        <li><strong>AI Content:</strong> Groq generates caption & image prompt</li>
+                        <li><strong>Image:</strong> Pollinations creates stunning visuals</li>
+                        <li><strong>Audio:</strong> Random background music from your Drive</li>
+                        <li><strong>Video:</strong> Rendered in your browser (no server needed!)</li>
+                        <li><strong>Share:</strong> Download & post to Instagram/YouTube</li>
+                    </ul>
+                </div>
             </div>
 
-            <div class="status" id="status"></div>
+            <!-- Right Panel: Preview -->
+            <div class="card">
+                <h2>📱 Video Preview</h2>
+                
+                <div class="video-preview" id="videoPreview">
+                    <div class="video-preview-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <p>Your video will appear here</p>
+                    </div>
+                </div>
 
-            <div class="info-box" style="margin-top: 30px;">
-                <h4>📱 How This Works:</h4>
-                <ul style="margin-left: 20px; color: #78350f;">
-                    <li>AI generates image + caption + hashtags</li>
-                    <li>Email sent with preview & download links</li>
-                    <li>Download image and upload to Instagram/YouTube</li>
-                    <li>100% Forever Free!</li>
-                </ul>
+                <div id="metadataSection" style="display: none;">
+                    <div class="metadata">
+                        <h4>📝 Caption</h4>
+                        <p id="captionText"></p>
+                        
+                        <div class="hashtags" id="hashtagsContainer"></div>
+                    </div>
+
+                    <div class="download-section">
+                        <button class="btn btn-secondary" onclick="downloadVideo()" id="downloadBtn" style="display: none;">
+                            <span>⬇️</span>
+                            <span>Download Video</span>
+                        </button>
+                        <button class="btn btn-success" onclick="copyCaption()">
+                            <span>📋</span>
+                            <span>Copy Caption</span>
+                        </button>
+                    </div>
+                </div>
             </div>
+        </div>
+
+        <!-- Gallery Section -->
+        <div class="card" id="gallerySection" style="display: none;">
+            <h2>🎞️ Recent Reels</h2>
+            <div class="gallery-grid" id="reelsGallery"></div>
         </div>
     </div>
 
+    <!-- FFmpeg.wasm from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+
     <script>
-        async function createReel() {
+        // Global variables
+        let ffmpegInstance = null;
+        let currentVideoBlob = null;
+        let currentMetadata = {
+            caption: '',
+            hashtags: [],
+            imageUrl: '',
+            audioUrl: ''
+        };
+
+        // Initialize FFmpeg
+        async function loadFFmpeg() {
+            if (ffmpegInstance) return ffmpegInstance;
+            
+            const { FFmpeg } = FFmpegWASM;
+            const ffmpeg = new FFmpeg();
+            
+            ffmpeg.on('log', ({ message }) => {
+                console.log(message);
+            });
+            
+            ffmpeg.on('progress', ({ progress }) => {
+                if (progress > 0 && progress <= 1) {
+                    updateProgress(50 + (progress * 50)); // 50-100% for video encoding
+                    updateLoadingText(`Rendering video: ${Math.round(progress * 100)}%`);
+                }
+            });
+            
+            await ffmpeg.load({
+                coreURL: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js",
+                wasmURL: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm",
+            });
+            
+            ffmpegInstance = ffmpeg;
+            return ffmpeg;
+        }
+
+        // Main reel generation function
+        async function generateReel() {
             const prompt = document.getElementById('promptInput').value.trim();
             
             if (!prompt) {
@@ -149,59 +610,183 @@
 
             showLoading(true);
             disableButton(true);
+            updateProgress(0);
+            updateLoadingText('Connecting to AI...');
 
             try {
-                // CORS FIX: Use fetch with no-cors mode as fallback
+                // Step 1: Generate AI content via n8n
+                updateLoadingText('Generating AI content...');
+                updateProgress(10);
+                
                 const response = await fetch('https://vibeacademy.cloud/webhook/create-reel', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ prompt: prompt }),
-                    mode: 'cors', // Will try CORS first
-                }).catch(async (corsError) => {
-                    // If CORS fails, use alternative approach
-                    console.log('CORS blocked, using alternative method...');
-                    
-                    // Alternative: Open in new tab (works but not ideal)
-                    // Or use a CORS proxy
-                    return fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://vibeacademy.cloud/webhook/create-reel'), {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ prompt: prompt })
-                    });
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
                 const data = await response.json();
                 
-                if (data.success) {
-                    showStatus(`🎉 Success! Reel created: ${data.reel_id}. Check your email!`, 'success');
-                    document.getElementById('promptInput').value = '';
-                } else {
-                    throw new Error(data.message || 'Failed to create reel');
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to generate content');
                 }
 
+                // Store metadata
+                currentMetadata = {
+                    caption: data.caption || 'AI Generated Reel',
+                    hashtags: data.hashtags ? data.hashtags.split(' ').filter(h => h.startsWith('#')) : [],
+                    imageUrl: data.image_url,
+                    audioUrl: data.audio_url,
+                    reelId: data.reel_id
+                };
+
+                // Step 2: Render video with FFmpeg
+                updateLoadingText('Loading video renderer...');
+                updateProgress(30);
+                
+                await renderVideo(data.image_url, data.audio_url);
+                
+                // Step 3: Display results
+                displayMetadata();
+                showStatus('🎉 Reel created successfully! Download or share now.', 'success');
+                
             } catch (error) {
                 console.error('Error:', error);
-                
-                // User-friendly error message
-                showStatus(
-                    `⚠️ Request sent but response blocked by browser. This is a CORS issue. ` +
-                    `Solution: Contact admin to enable CORS on n8n webhook, or the reel may still be created - check your email in 1 minute!`,
-                    'error'
-                );
+                showStatus(`❌ Error: ${error.message}`, 'error');
             } finally {
                 showLoading(false);
                 disableButton(false);
             }
         }
 
+        // Render video using FFmpeg.wasm
+        async function renderVideo(imageUrl, audioUrl) {
+            updateLoadingText('Initializing video renderer...');
+            updateProgress(35);
+
+            const ffmpeg = await loadFFmpeg();
+            
+            updateLoadingText('Downloading media files...');
+            updateProgress(40);
+
+            // Fetch image and audio
+            const imageResponse = await fetch(imageUrl);
+            const imageBlob = await imageResponse.blob();
+            const imageBuffer = await imageBlob.arrayBuffer();
+            
+            let audioBuffer = null;
+            let hasAudio = false;
+            
+            if (audioUrl && !audioUrl.includes('null')) {
+                try {
+                    const audioResponse = await fetch(audioUrl);
+                    const audioBlob = await audioResponse.blob();
+                    audioBuffer = await audioBlob.arrayBuffer();
+                    hasAudio = true;
+                } catch (e) {
+                    console.warn('Audio fetch failed, creating video without audio');
+                }
+            }
+
+            updateLoadingText('Preparing video encoding...');
+            updateProgress(45);
+
+            // Write files to FFmpeg virtual filesystem
+            await ffmpeg.writeFile('input.jpg', new Uint8Array(imageBuffer));
+            
+            if (hasAudio) {
+                await ffmpeg.writeFile('audio.mp3', new Uint8Array(audioBuffer));
+            }
+
+            updateLoadingText('Rendering video (this may take 10-30 seconds)...');
+            updateProgress(50);
+
+            // FFmpeg command to create video
+            // Create a 15-second video from static image with optional audio
+            const ffmpegArgs = [
+                '-loop', '1',
+                '-i', 'input.jpg',
+                '-t', '15',
+                '-vf', 'scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p',
+                '-c:v', 'libx264',
+                '-preset', 'ultrafast',
+                '-crf', '23',
+                '-movflags', '+faststart'
+            ];
+
+            if (hasAudio) {
+                ffmpegArgs.splice(4, 0, '-i', 'audio.mp3');
+                ffmpegArgs.push('-c:a', 'aac', '-b:a', '128k', '-shortest');
+            } else {
+                ffmpegArgs.push('-an');
+            }
+
+            ffmpegArgs.push('output.mp4');
+
+            await ffmpeg.exec(ffmpegArgs);
+
+            updateLoadingText('Finalizing video...');
+            updateProgress(95);
+
+            // Read the output video
+            const videoData = await ffmpeg.readFile('output.mp4');
+            const videoBlob = new Blob([videoData.buffer], { type: 'video/mp4' });
+            currentVideoBlob = videoBlob;
+
+            // Display video
+            const videoUrl = URL.createObjectURL(videoBlob);
+            const previewContainer = document.getElementById('videoPreview');
+            previewContainer.innerHTML = `
+                <video controls autoplay loop>
+                    <source src="${videoUrl}" type="video/mp4">
+                </video>
+            `;
+
+            document.getElementById('downloadBtn').style.display = 'flex';
+            updateProgress(100);
+        }
+
+        // Display metadata (caption, hashtags)
+        function displayMetadata() {
+            document.getElementById('metadataSection').style.display = 'block';
+            document.getElementById('captionText').textContent = currentMetadata.caption;
+            
+            const hashtagsContainer = document.getElementById('hashtagsContainer');
+            hashtagsContainer.innerHTML = '';
+            currentMetadata.hashtags.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = 'hashtag';
+                span.textContent = tag;
+                hashtagsContainer.appendChild(span);
+            });
+        }
+
+        // Download video
+        function downloadVideo() {
+            if (!currentVideoBlob) return;
+            
+            const url = URL.createObjectURL(currentVideoBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `reel_${currentMetadata.reelId || Date.now()}.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showStatus('✅ Video downloaded successfully!', 'success');
+        }
+
+        // Copy caption to clipboard
+        function copyCaption() {
+            const fullText = `${currentMetadata.caption}\n\n${currentMetadata.hashtags.join(' ')}`;
+            navigator.clipboard.writeText(fullText).then(() => {
+                showStatus('✅ Caption copied! Ready to paste on Instagram 🚀', 'success');
+            });
+        }
+
+        // UI Helper functions
         function showLoading(show) {
             document.getElementById('loading').classList.toggle('active', show);
         }
@@ -215,6 +800,20 @@
         function disableButton(disabled) {
             document.getElementById('createBtn').disabled = disabled;
         }
+
+        function updateProgress(percent) {
+            document.getElementById('progressBar').style.width = `${percent}%`;
+        }
+
+        function updateLoadingText(text) {
+            document.getElementById('loadingText').textContent = text;
+        }
+
+        // Load gallery on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🎬 AI Reel Studio loaded');
+            showStatus('ℹ️ Ready to create your first reel! Enter a prompt above.', 'info');
+        });
     </script>
 </body>
 </html>
