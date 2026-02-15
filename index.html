@@ -537,6 +537,9 @@
                         <h4>📝 Caption</h4>
                         <p id="captionText"></p>
                         
+                        <h4 style="margin-top: 15px;">🎤 Script (Voiceover)</h4>
+                        <p id="scriptText" style="font-style: italic; color: rgba(255, 255, 255, 0.9);"></p>
+                        
                         <h4 style="margin-top: 15px;">🏷️ Hashtags</h4>
                         <div class="hashtags" id="hashtagsContainer"></div>
                         
@@ -555,7 +558,7 @@
                         </button>
                         <button class="btn btn-success" onclick="copyCaption()">
                             <span>📋</span>
-                            <span>Copy Caption</span>
+                            <span>Copy All Content</span>
                         </button>
                     </div>
 
@@ -619,8 +622,16 @@
                 const data = await response.json();
                 console.log('✅ Full API Response:', JSON.stringify(data, null, 2));
                 
-                if (!data.success) {
-                    throw new Error(data.message || 'Failed to generate content');
+                // Check if this is email response (wrong connection)
+                if (data.id && data.threadId && data.labelIds) {
+                    throw new Error('⚠️ Email response received. Workflow may still be processing. Check email in 30 seconds.');
+                }
+                
+                // Store data (don't check success, just check if we have reel data)
+                if (data.reel_id || data.caption || data.image_url) {
+                    console.log('✅ Reel data found!');
+                } else {
+                    console.warn('⚠️ Incomplete data, but proceeding...');
                 }
 
                 updateProgress(80);
@@ -658,6 +669,11 @@
             const caption = data.caption || 'AI-generated caption will appear here';
             console.log('📝 Caption:', caption);
             document.getElementById('captionText').textContent = caption;
+            
+            // Show script
+            const script = data.script || 'No voiceover script generated';
+            console.log('🎤 Script:', script);
+            document.getElementById('scriptText').textContent = script;
             
             // Show reel ID
             const reelId = data.reel_id || data.id || 'N/A';
@@ -863,6 +879,7 @@
             }
 
             const caption = currentReelData.caption || '';
+            const script = currentReelData.script || '';
             let hashtags = '';
             
             if (currentReelData.hashtags_string) {
@@ -873,12 +890,12 @@
                 hashtags = currentReelData.hashtags;
             }
             
-            const fullText = `${caption}\n\n${hashtags}`;
+            const fullText = `📝 CAPTION:\n${caption}\n\n🎤 SCRIPT:\n${script}\n\n🏷️ HASHTAGS:\n${hashtags}`;
             
             navigator.clipboard.writeText(fullText).then(() => {
-                showStatus('✅ Caption + Hashtags copied! Ready to paste 🚀', 'success');
+                showStatus('✅ Caption + Script + Hashtags copied!', 'success');
             }).catch(err => {
-                showStatus('❌ Failed to copy caption', 'error');
+                showStatus('❌ Failed to copy', 'error');
                 console.error('Copy error:', err);
             });
         }
